@@ -20,7 +20,8 @@ The application has the following services:
 | `virtual-worker`   | Simulates order completion on a scheduled basis (Rust)                               | [bestbuy-virtual-worker-L8](https://github.com/boda0004/bestbuy-virtual-worker-L8)     | –                                     |
 
 ### Diagram
-[BestBuy architecture diagram](<Bestbuy architechture diagram.jpg>)
+![Bestbuy architechture diagram](https://github.com/user-attachments/assets/d713002c-ba0b-44c9-8268-528332501dbb)
+
 
 ### Architecture Overview
 

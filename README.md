@@ -55,23 +55,24 @@ The application has the following services:
 2. **Build & Push Docker Images**
 Run these for each service directory (store‑front, store‑admin, order‑service, product‑service, makeline‑service, ai‑service):
 
-    cd <service-name>
-    docker build -t boda0004/<service-name>:latest .
-    docker push boda0004/<service-name>:latest
-    cd ..
+       cd <service-name>
+       docker build -t boda0004/<service-name>:latest .
+       docker push boda0004/<service-name>:latest
+       cd ..
 
 3. **Deploy Microservices to AKS**
 kubectl create namespace bestbuy
-
-    kubectl apply -f k8s/store-front.yaml      -n bestbuy
-    kubectl apply -f k8s/store-admin.yaml      -n bestbuy
-    kubectl apply -f k8s/order-service.yaml    -n bestbuy
-    kubectl apply -f k8s/product-service.yaml  -n bestbuy
-    kubectl apply -f k8s/makeline-service.yaml -n bestbuy
-    kubectl apply -f k8s/ai-service.yaml       -n bestbuy
+   
+       kubectl apply -f k8s/store-front.yaml      -n bestbuy
+       kubectl apply -f k8s/store-admin.yaml      -n bestbuy
+       kubectl apply -f k8s/order-service.yaml    -n bestbuy
+       kubectl apply -f k8s/product-service.yaml  -n bestbuy
+       kubectl apply -f k8s/makeline-service.yaml -n bestbuy
+       kubectl apply -f k8s/ai-service.yaml       -n bestbuy
 
 4. **Verify Deployment**
-    kubectl get pods,svc -n bestbuy
+
+       kubectl get pods,svc -n bestbuy
 
 
 ## Run the app on Azure Kubernetes Service (AKS)

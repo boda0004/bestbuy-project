@@ -51,71 +51,71 @@ spec:
   type: ClusterIP # Internal cluster service
 ---
 # StatefulSet for RabbitMQ
-apiVersion: apps/v1
-kind: StatefulSet
-metadata:
-  name: rabbitmq
-spec:
-  serviceName: rabbitmq # Headless service for RabbitMQ
-  replicas: 1 # Single replica
-  selector:
-    matchLabels:
-      app: rabbitmq
-  template:
-    metadata:
-      labels:
-        app: rabbitmq
-    spec:
-      nodeSelector:
-        "kubernetes.io/os": linux
-      containers:
-        - name: rabbitmq
-          image: rabbitmq:3-management # RabbitMQ image with management UI
-          ports:
-            - containerPort: 5672 # AMQP protocol port
-              name: rabbitmq-amqp
-            - containerPort: 15672 # HTTP management UI port
-              name: rabbitmq-http
-          env: # Environment variables for RabbitMQ
-            - name: RABBITMQ_DEFAULT_USER
-              value: "username" # Default username
-            - name: RABBITMQ_DEFAULT_PASS
-              value: "password" # Default password
-          resources: # Resource limits and requests
-            requests:
-              cpu: 10m
-              memory: 128Mi
-            limits:
-              cpu: 250m
-              memory: 256Mi
-          volumeMounts: # Mount configuration for RabbitMQ plugins
-            - name: rabbitmq-enabled-plugins
-              mountPath: /etc/rabbitmq/enabled_plugins
-              subPath: enabled_plugins
-      volumes:
-        - name: rabbitmq-enabled-plugins
-          configMap:
-            name: rabbitmq-enabled-plugins
-            items:
-              - key: rabbitmq_enabled_plugins
-                path: enabled_plugins
+# apiVersion: apps/v1
+# kind: StatefulSet
+# metadata:
+#   name: rabbitmq
+# spec:
+#   serviceName: rabbitmq # Headless service for RabbitMQ
+#   replicas: 1 # Single replica
+#   selector:
+#     matchLabels:
+#       app: rabbitmq
+#   template:
+#     metadata:
+#       labels:
+#         app: rabbitmq
+#     spec:
+#       nodeSelector:
+#         "kubernetes.io/os": linux
+#       containers:
+#         - name: rabbitmq
+#           image: rabbitmq:3-management # RabbitMQ image with management UI
+#           ports:
+#             - containerPort: 5672 # AMQP protocol port
+#               name: rabbitmq-amqp
+#             - containerPort: 15672 # HTTP management UI port
+#               name: rabbitmq-http
+#           env: # Environment variables for RabbitMQ
+#             - name: RABBITMQ_DEFAULT_USER
+#               value: "username" # Default username
+#             - name: RABBITMQ_DEFAULT_PASS
+#               value: "password" # Default password
+#           resources: # Resource limits and requests
+#             requests:
+#               cpu: 10m
+#               memory: 128Mi
+#             limits:
+#               cpu: 250m
+#               memory: 256Mi
+#           volumeMounts: # Mount configuration for RabbitMQ plugins
+#             - name: rabbitmq-enabled-plugins
+#               mountPath: /etc/rabbitmq/enabled_plugins
+#               subPath: enabled_plugins
+#       volumes:
+#         - name: rabbitmq-enabled-plugins
+#           configMap:
+#             name: rabbitmq-enabled-plugins
+#             items:
+#               - key: rabbitmq_enabled_plugins
+#                 path: enabled_plugins
 ---
 # Service for RabbitMQ
-apiVersion: v1
-kind: Service
-metadata:
-  name: rabbitmq
-spec:
-  selector:
-    app: rabbitmq
-  ports:
-    - name: rabbitmq-amqp
-      port: 5672
-      targetPort: 5672
-    - name: rabbitmq-http
-      port: 15672
-      targetPort: 15672
-  type: ClusterIP
+# apiVersion: v1
+# kind: Service
+# metadata:
+#   name: rabbitmq
+# spec:
+#   selector:
+#     app: rabbitmq
+#   ports:
+#     - name: rabbitmq-amqp
+#       port: 5672
+#       targetPort: 5672
+#     - name: rabbitmq-http
+#       port: 15672
+#       targetPort: 15672
+#   type: ClusterIP
 ---
 # Deployment for Order Service
 apiVersion: apps/v1
@@ -136,20 +136,20 @@ spec:
         "kubernetes.io/os": linux
       containers:
         - name: order-service
-          image: ramymohamed/order-service-l8:latest # Custom image for order service
+          image: boda0004/order-service:latest # Custom image for order service
           ports:
             - containerPort: 3000 # Order service listens on this port
           env: # Environment variables for configuration
             - name: ORDER_QUEUE_HOSTNAME
-              value: "rabbitmq"
+              value: "bestbuyservicebus.servicebus.windows.net"
             - name: ORDER_QUEUE_PORT
               value: "5672"
             - name: ORDER_QUEUE_USERNAME
-              value: "username"
+              value: "sender"
             - name: ORDER_QUEUE_PASSWORD
-              value: "password"
+              value: "password" # azure service bus password
             - name: ORDER_QUEUE_NAME
-              value: "orders"
+              value: "orders-queue"
             - name: FASTIFY_ADDRESS
               value: "0.0.0.0"
           resources: # Resource allocation
@@ -180,22 +180,6 @@ spec:
             failureThreshold: 5
             initialDelaySeconds: 3
             periodSeconds: 3
-      initContainers: # Initialization container to wait for RabbitMQ
-        - name: wait-for-rabbitmq
-          image: busybox
-          command:
-            [
-              "sh",
-              "-c",
-              "until nc -zv rabbitmq 5672; do echo waiting for rabbitmq; sleep 2; done;",
-            ]
-          resources:
-            requests:
-              cpu: 1m
-              memory: 50Mi
-            limits:
-              cpu: 100m
-              memory: 256Mi
 ---
 # Service for Order Service
 apiVersion: v1
@@ -230,18 +214,18 @@ spec:
         "kubernetes.io/os": linux
       containers:
         - name: makeline-service
-          image: ramymohamed/makeline-service-l8:latest # Custom Makeline service image
+          image: boda0004/makeline-service:latest # Custom Makeline service image
           ports:
             - containerPort: 3001 # Makeline service listens on this port
           env: # Environment variables for configuration
             - name: ORDER_QUEUE_URI
-              value: "amqp://rabbitmq:5672" # RabbitMQ connection string
+              value: "amqp://bestbuyservicebus.servicebus.windows.net" # RabbitMQ connection string
             - name: ORDER_QUEUE_USERNAME
-              value: "username"
+              value: "listener"
             - name: ORDER_QUEUE_PASSWORD
-              value: "password"
+              value: "password" # Azure service bus password
             - name: ORDER_QUEUE_NAME
-              value: "orders"
+              value: "orders-queue"
             - name: ORDER_DB_URI
               value: "mongodb://mongodb:27017" # MongoDB connection string
             - name: ORDER_DB_NAME
@@ -309,7 +293,7 @@ spec:
         "kubernetes.io/os": linux
       containers:
         - name: product-service
-          image: ramymohamed/product-service-l8:latest # Custom product service image
+          image: boda0004/product-service:latest # Custom product service image
           ports:
             - containerPort: 3002 # Product service listens on this port
           env: # Environment variables for configuration
@@ -370,7 +354,7 @@ spec:
         "kubernetes.io/os": linux
       containers:
         - name: store-front
-          image: ramymohamed/store-front-l8:latest # Front-end store application
+          image: boda0004/store-front:latest # Front-end store application
           ports:
             - containerPort: 8080 # Front-end app port
               name: store-front
@@ -440,7 +424,7 @@ spec:
         "kubernetes.io/os": linux
       containers:
         - name: store-admin
-          image: ramymohamed/store-admin-l8:latest # Admin interface for store
+          image: boda0004/store-admin:latest # Admin interface for store
           ports:
             - containerPort: 8081 # Admin app port
               name: store-admin
@@ -510,7 +494,7 @@ spec:
         "kubernetes.io/os": linux
       containers:
         - name: ai-service
-          image: ramymohamed/ai-service-l8:latest
+          image: boda0004/ai-service:latest
           ports:
             - containerPort: 5001
           env:
@@ -519,13 +503,13 @@ spec:
             - name: AZURE_OPENAI_API_VERSION
               value: "2024-07-01-preview"
             - name: AZURE_OPENAI_DEPLOYMENT_NAME # required if using Azure OpenAI
-              value: ""
+              value: "gpt-4"
             - name: AZURE_OPENAI_ENDPOINT # required if using Azure OpenAI
-              value: ""
+              value: "https://boda0004bestbuyai.openai.azure.com/"
             - name: AZURE_OPENAI_DALLE_ENDPOINT
-              value: ""
+              value: "https://boda0004bestbuyai.openai.azure.com/"
             - name: AZURE_OPENAI_DALLE_DEPLOYMENT_NAME
-              value: ""
+              value: "dall-e-3"
             - name: OPENAI_API_KEY # always required
               valueFrom:
                 secretKeyRef:

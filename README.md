@@ -74,10 +74,28 @@ kubectl create namespace bestbuy
 
        kubectl get pods,svc -n bestbuy
 
+# Docker images
+
+| **Service**          | **Docker Hub Link**                                                                   |
+|----------------------|---------------------------------------------------------------------------------------|
+| Store-Front          | https://hub.docker.com/repository/docker/boda0004/store-front                         |
+| Store-Admin          | https://hub.docker.com/repository/docker/boda0004/store-admin                         |
+| Order-Service        | https://hub.docker.com/repository/docker/boda0004/order-service                       |
+| Product-Service      | https://hub.docker.com/repository/docker/boda0004/product-service                     |
+| Makeline-Service     | https://hub.docker.com/repository/docker/boda0004/makeline-service                    |
+| AI-Service           | https://hub.docker.com/repository/docker/boda0004/ai-service                          |
+
+---
+
 
 ## Run the app on Azure Kubernetes Service (AKS)
 
 You can use the kubernetes YAML files provided in the [Deployment Files](./Deployment%20Files/) folder to deploy the app to an AKS cluster.
+
+# Demo
+
+https://drive.google.com/file/d/1UriVTlFsInzwzdL74hEdG26xsK8SQMxV/view?usp=drive_link
+
 
 
 
